@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class Game {
     public static final int INVALID = -1;
@@ -8,12 +9,25 @@ public class Game {
     public static final int BOT_PLAYER = 2;
     public static final int HEIGHT = 17;
     public static final int WIDTH = 25;
+    public static int MAX = 1000;
+    public static int MIN = -1000;
+
     public int[][] board, tmpboard;
+    public ArrayList<Cell> playerList = new ArrayList<>();
+    public ArrayList<Cell> playerStartList = new ArrayList<>();
+    public ArrayList<Cell> botList = new ArrayList<>();
+    public ArrayList<Cell> botStartList = new ArrayList<>();
     public int Turn;
 
     public Game() {
         board = new int[HEIGHT][WIDTH];
         buildBoard();
+        loadTmpBoard();
+        this.Turn = 1; // that mean the player will play first
+    }
+
+    public Game(int[][] board) {
+        this.board = board;
         loadTmpBoard();
         this.Turn = 1; // that mean the player will play first
     }
@@ -41,27 +55,90 @@ public class Game {
 
         // set green cells to 1
         board[0][12] = BOT_PLAYER;
+        botList.add(new Cell(0, 12));
+        botStartList.add(new Cell(0, 12));
+
         board[1][11] = BOT_PLAYER;
+        botList.add(new Cell(1, 11));
+        botStartList.add(new Cell(1, 11));
+
         board[1][13] = BOT_PLAYER;
+        botList.add(new Cell(1, 13));
+        botStartList.add(new Cell(1, 13));
+
         board[2][10] = BOT_PLAYER;
+        botList.add(new Cell(2, 10));
+        botStartList.add(new Cell(2, 10));
+
         board[2][12] = BOT_PLAYER;
+        botList.add(new Cell(2, 12));
+        botStartList.add(new Cell(2, 12));
+
         board[2][14] = BOT_PLAYER;
+        botList.add(new Cell(2, 14));
+        botStartList.add(new Cell(2, 14));
+
         board[3][9] = BOT_PLAYER;
+        botList.add(new Cell(3, 9));
+        botStartList.add(new Cell(3, 9));
+
         board[3][11] = BOT_PLAYER;
+        botList.add(new Cell(3, 11));
+        botStartList.add(new Cell(3, 11));
+
         board[3][13] = BOT_PLAYER;
+        botList.add(new Cell(3, 13));
+        botStartList.add(new Cell(3, 13));
+
         board[3][15] = BOT_PLAYER;
+        botList.add(new Cell(3, 15));
+        botStartList.add(new Cell(3, 15));
+
 
         // set red cells to 2
         board[13][9] = HUMAN_PLAYER;
+        playerList.add(new Cell(13, 9));
+        playerStartList.add(new Cell(13, 9));
+
         board[13][11] = HUMAN_PLAYER;
+        playerList.add(new Cell(13, 11));
+        playerStartList.add(new Cell(13, 11));
+
         board[13][13] = HUMAN_PLAYER;
+        playerList.add(new Cell(13, 13));
+        playerStartList.add(new Cell(13, 13));
+
         board[13][15] = HUMAN_PLAYER;
+        playerList.add(new Cell(13, 15));
+        playerStartList.add(new Cell(13, 15));
+
         board[14][10] = HUMAN_PLAYER;
+        playerList.add(new Cell(14, 10));
+        playerStartList.add(new Cell(14, 10));
+
         board[14][12] = HUMAN_PLAYER;
+        playerList.add(new Cell(14, 12));
+        playerStartList.add(new Cell(14, 12));
+
         board[14][14] = HUMAN_PLAYER;
+        playerList.add(new Cell(14, 14));
+        playerStartList.add(new Cell(14, 14));
+
         board[15][11] = HUMAN_PLAYER;
+        playerList.add(new Cell(15, 11));
+        playerStartList.add(new Cell(15, 11));
+
         board[15][13] = HUMAN_PLAYER;
+        playerList.add(new Cell(15, 13));
+        playerStartList.add(new Cell(15, 13));
+
         board[16][12] = HUMAN_PLAYER;
+        playerList.add(new Cell(16, 12));
+        playerStartList.add(new Cell(16, 12));
+
+        Collections.reverse(botStartList);
+        Collections.reverse(playerStartList);
+        Collections.reverse(playerList);
 
         // first 4 rows
         for (int i = 0; i < 4; i++)
@@ -199,7 +276,7 @@ public class Game {
     // verify move for player
     public boolean verifyAdjMoveForP(int currentX, int currentY, int goalX, int goalY) {
         int value = board[currentY][currentX];
-        if (!(value == HUMAN_PLAYER)) {
+        if (!(value == BOT_PLAYER)) {
             System.out.println("You can't access this marble");
             return false;
         }
@@ -209,42 +286,42 @@ public class Game {
         }
         // check move left
         if (currentY == goalY && currentX - 2 == goalX) {
-            if (moveHorizontalL(currentX, currentY))
+            if (board[currentY][currentX - 2] == EMPTY)
                 return true;
             return false;
         }
 
         // check move right
         else if (currentY == goalY && currentX + 2 == goalX) {
-            if (moveHorizontalR(currentX, currentY))
+            if (board[currentY][currentX + 2] == EMPTY)
                 return true;
             return false;
         }
 
         // check move diagonal up right
         else if (currentY - 1 == goalY && currentX + 1 == goalX) {
-            if (moveDiagonalUR(currentX, currentY))
+            if (board[currentY - 1][currentX + 1] == EMPTY)
                 return true;
             return false;
         }
 
         // check move diagonal up left
         else if (currentY - 1 == goalY && currentX - 1 == goalX) {
-            if (moveDiagonalUL(currentX, currentY))
+            if (board[currentY - 1][currentX - 1] == EMPTY)
                 return true;
             return false;
         }
 
         // check move diagonal down right
         else if (currentY + 1 == goalY && currentX + 1 == goalX) {
-            if (moveDiagonalDR(currentX, currentY))
+            if (board[currentY + 1][currentX + 1] == EMPTY)
                 return true;
             return false;
         }
 
         // check move diagonal down left
-        else if (currentY + 1 == goalY && currentX - 1 == goalX) {
-            if (moveDiagonalDL(currentX, currentY))
+        else if (currentY + 1 == goalY && currentY - 1 == goalX) {
+            if (board[currentY + 1][currentX - 1] == EMPTY)
                 return true;
             return false;
         }
@@ -328,7 +405,6 @@ public class Game {
     //start from current and recursion call to find goal if found
     public boolean verifyHopMoveForP(int currentX, int currentY, int goalX, int goalY, ArrayList<int[][]> states) {
         if (currentX == goalX && currentY == goalY) {
-            loadToBoard();
             return true;
         }
         //left
@@ -580,7 +656,6 @@ public class Game {
 
     // direct move
     public void move(int x, int y, int newx, int newy) {
-        System.out.println(x + " " + y + " " + newx + " " + newy);
         board[newy][newx] = board[y][x];
         board[y][x] = EMPTY;
         loadTmpBoard();
@@ -629,6 +704,190 @@ public class Game {
                 System.out.print(board[i][j] + " ");
             }
             System.out.println();
+        }
+    }
+
+    // get heuristic value of current board
+    // ---------- heuristic function ------------
+
+    public int getHeuristic(int[][] tBoard)
+    {
+        Game game = new Game(tBoard);
+        int minVal = 100000;
+
+        for (Cell p : game.getAvailableCells(0)) {
+
+            //System.out.println("p.x: " + p.y + " p.y: " + p.x);
+            //System.out.println(p.AvailableCells);
+
+            int x, y, restmp;
+
+            for (int i = 0; i < p.AvailableCells.size() - 1; i += 2) {
+
+                x = p.AvailableCells.get(i);
+                y = p.AvailableCells.get(i + 1);
+
+
+
+                for (Cell goalP : playerStartList) {
+                    restmp = Math.abs(x - goalP.x) + Math.abs(y - goalP.y);
+                    if (restmp < minVal)
+                    {
+                        System.out.println("less " + goalP.x + " " + goalP.y + " " + p.x + " " + p.y + " " + x + " " + y);
+                        System.out.println("Board");
+                        for (int k = 0; k < HEIGHT; k++) {
+                            for (int j = 0; j < WIDTH; j++) {
+                                System.out.print(tBoard[k][j] + " ");
+                            }
+                            System.out.println();
+                        }
+                        System.out.println();
+                        minVal = restmp;
+                    }
+                }
+            }
+        }
+        System.out.println("minVal = " + minVal);
+        return minVal;
+    }
+
+    // generate all possible boards of current boaard by moving each marble to one of each possible move in AvailableCells
+    public ArrayList<Node> generateNextState(int[][] board) {
+        ArrayList<Node> resultList = new ArrayList<>();
+        Game tmpGame = new Game(board);
+
+        for (Cell p : tmpGame.getAvailableCells(0)) {
+            int x, y;
+
+            for (int i = 0; i < p.AvailableCells.size(); i += 2) {
+
+                x = p.AvailableCells.get(i);	// because p.AvailableCells return [y, x, y, x, ....]
+                y = p.AvailableCells.get(i + 1);
+
+                if (!tmpGame.verifyAdjMoveForP(p.y, p.x, y, x))
+                    continue;
+
+                int[][] tmpBoard = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
+
+                tmpBoard[p.y][p.x] = EMPTY;
+                tmpBoard[y][x] = BOT_PLAYER; // because p.AvailableCells return [y, x, y, x, ....]}
+
+                Node tmpNode = new Node();
+                tmpNode.board = Arrays.stream(tmpBoard).map(int[]::clone).toArray(int[][]::new);
+
+
+
+                tmpNode.x = p.x;
+                tmpNode.y = p.y;
+                tmpNode.newX = x;
+                tmpNode.newY = y;
+
+                resultList.add(tmpNode);
+            }
+        }
+
+        for (Node node : resultList) {
+            System.out.println(node.x + " " + node.y + " " + node.newX + " " + node.newY);
+        }
+
+        return resultList;
+    }
+
+    // ---------- Alpha-Beta -------------
+
+    public Node alphaBetaPruning(int depth, int maxDepth, Node currentNode, Boolean maximizingPlayer, int alpha, int beta) {
+
+        // generate new boards for the next level of the tree
+        ArrayList<Node> subStates = new ArrayList<>();
+        subStates = generateNextState(currentNode.board);
+
+        // when reach recuired depth calc the heuristic value of this board
+        if (depth == maxDepth)
+        {
+            int hueVal = getHeuristic(currentNode.board);
+            currentNode.heuristicVal = hueVal;
+            return currentNode;
+        }
+
+        if (maximizingPlayer) {
+            Node bestNode = new Node();
+            bestNode.heuristicVal = MIN;
+
+            // call alphaBeta for each subState
+            for (int i = 0; i < subStates.size(); i++) {
+
+                Node nextNode = alphaBetaPruning(depth + 1, maxDepth, subStates.get(i), false, alpha, beta);
+
+                // get max best node
+                if (bestNode.heuristicVal < nextNode.heuristicVal)
+                {
+                    // copy nextNode.board to bestNode.board
+                    bestNode.board = new int[Game.HEIGHT][];
+                    for (int j = 0; j < Game.HEIGHT; j++) {
+                        bestNode.board[j] = nextNode.board[j].clone();
+                    }
+
+                    bestNode.heuristicVal = nextNode.heuristicVal;
+                    bestNode.newX = nextNode.newX;
+                    bestNode.newY = nextNode.newY;
+                    bestNode.x = nextNode.x;
+                    bestNode.y = nextNode.y;
+
+                    System.out.println("--Alpha--");
+                    System.out.println(bestNode.x + " " + bestNode.y);
+                    System.out.println(bestNode.newX + " " + bestNode.newY);
+                    System.out.println("------");
+
+                }
+                //best = Math.max(best, nextNode.heuristicVal);
+                alpha = Math.max(alpha, bestNode.heuristicVal);
+
+                // Alpha Beta Pruning
+                if (beta <= alpha)
+                    break;
+            }
+            return bestNode;
+
+        } else {
+            //int best = MAX;
+            Node bestNode = new Node();
+            bestNode.heuristicVal = MAX;
+            // Recur for left and
+            // right children
+
+
+            for (int i = 0; i < subStates.size(); i++) {
+
+                Node nextNode = alphaBetaPruning(depth + 1, maxDepth, subStates.get(i), true, alpha, beta);
+
+                // get max best node
+                if(bestNode.heuristicVal > nextNode.heuristicVal)
+                {
+                    // copy nextNode.board to bestNode.board
+                    bestNode.board = new int[Game.HEIGHT][];
+                    for (int j = 0; j < Game.HEIGHT; j++) {
+                        bestNode.board[j] = nextNode.board[j].clone();
+                    }
+
+                    bestNode.heuristicVal = nextNode.heuristicVal;
+                    bestNode.newX = nextNode.newX;
+                    bestNode.newY = nextNode.newY;
+                    bestNode.x = nextNode.x;
+                    bestNode.y = nextNode.y;
+
+                    System.out.println("---Beta--");
+                    System.out.println(bestNode.x + " " + bestNode.y);
+                    System.out.println(bestNode.newX + " " + bestNode.newY);
+                    System.out.println("------");
+                }
+
+                beta = Math.min(beta, bestNode.heuristicVal);
+                // Alpha Beta Pruning
+                if (beta <= alpha)
+                    break;
+            }
+
+            return bestNode;
         }
     }
 }
