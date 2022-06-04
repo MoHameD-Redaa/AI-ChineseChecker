@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BotPlayer extends Player {
     @Override
@@ -14,13 +15,11 @@ public class BotPlayer extends Player {
             return;
         }
 
-        ArrayList<Cell> cells = game.getAvailableCells(0);
-        for (Cell cell : cells) {
-            if (!cell.AvailableCells.isEmpty()) {
-                game.move(cell.x, cell.y, cell.AvailableCells.get(0), cell.AvailableCells.get(1));
-                game.Turn = 1;
-                break;
-            }
-        }
+        Node node = new Node();
+        node.board = Arrays.stream(game.board).map(int[]::clone).toArray(int[][]::new);
+        Node newNode = game.alphaBetaPruning(0, 1, node, true, Game.MIN, Game.MAX);
+        System.out.println(">> " + newNode.x + " " + newNode.y + " " + newNode.newX + " " + newNode.newY);
+        game.move(newNode.x, newNode.y, newNode.newX, newNode.newY);
+        game.Turn = 1;
     }
 }
