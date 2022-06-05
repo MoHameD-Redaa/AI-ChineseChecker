@@ -38,6 +38,14 @@ public class Game {
         this.Turn = 1;
     }
 
+    public Game copy() {
+        Game g = new Game();
+        g.board = this.board;
+        g.tmpboard = this.tmpboard;
+        g.Turn = this.Turn;
+        return g;
+    }
+
     public void buildBoard() {
 
         // set empty cells to 0
@@ -268,6 +276,7 @@ public class Game {
     // verify move for player
     public boolean verifyAdjMoveForP(int currentX, int currentY, int goalX, int goalY) {
         int value = board[currentY][currentX];
+        
         if (currentX == goalX && currentY == goalY) {
             System.out.println("can't play in same place");
             return false;
@@ -709,7 +718,16 @@ public class Game {
             //System.out.println(p.AvailableCells);
 
             int x, y, restmp;
-
+            
+//            for(Cell goalP : playerStartList) {
+//            	restmp = Math.abs(p.x - goalP.y) + Math.abs(p.y - goalP.x);
+//            	if (restmp < minVal)
+//                {
+//            		minVal = restmp;
+//                }
+//            }
+            	
+            	
             for (int i = 0; i < p.AvailableCells.size() - 1; i += 2) {
 
                 x = p.AvailableCells.get(i);
@@ -718,24 +736,29 @@ public class Game {
 
 
                 for (Cell goalP : playerStartList) {
-                    restmp = Math.abs(x - goalP.x) + Math.abs(y - goalP.y);
+                    restmp = Math.abs(x - goalP.y) + Math.abs(y - goalP.x);
                     if (restmp < minVal)
                     {
-//                        System.out.println("less " + goalP.x + " " + goalP.y + " " + p.x + " " + p.y + " " + x + " " + y);
-//                        System.out.println("Board");
+                        //System.out.println("less " + goalP.x + " " + goalP.y + " " + p.x + " " + p.y + " " + x + " " + y);
+                        //System.out.println("Board");
 //                        for (int k = 0; k < HEIGHT; k++) {
 //                            for (int j = 0; j < WIDTH; j++) {
+//                            	if(tBoard[k][j] == -1)
+//                            	{
+//                            		System.out.print("  ");
+//                            		continue;
+//                            	}
 //                                System.out.print(tBoard[k][j] + " ");
 //                            }
 //                            System.out.println();
 //                        }
-//                        System.out.println();
+                        //System.out.println();
                         minVal = restmp;
                     }
                 }
             }
         }
-//        System.out.println("minVal = " + minVal);
+        //System.out.println("minVal = " + minVal);
         return minVal;
     }
 
@@ -743,7 +766,20 @@ public class Game {
     public ArrayList<Node> generateNextState(int[][] board) {
         ArrayList<Node> resultList = new ArrayList<>();
         Game tmpGame = new Game(board);
-
+        
+//        System.out.println("parameter board");
+//        for (int k = 0; k < HEIGHT; k++) {
+//            for (int j = 0; j < WIDTH; j++) {
+//            	if(board[k][j] == INVALID)
+//            	{
+//            		System.out.print("  ");
+//            		continue;
+//            	}
+//                System.out.print(board[k][j] + " ");
+//            }
+//            System.out.println();
+//        }
+        
         for (Cell p : tmpGame.getAvailableCells(0)) {
             int x, y;
 
@@ -752,7 +788,7 @@ public class Game {
                 x = p.AvailableCells.get(i);	// because p.AvailableCells return [y, x, y, x, ....]
                 y = p.AvailableCells.get(i + 1);
 
-                if (!tmpGame.verifyAdjMoveForP(p.y, p.x, y, x))
+                if (!tmpGame.verifyAdjMoveForP(p.x, p.y, x, y)) //>>>>
                     continue;
 
                 int[][] tmpBoard = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
@@ -763,17 +799,29 @@ public class Game {
                 Node tmpNode = new Node();
                 tmpNode.board = Arrays.stream(tmpBoard).map(int[]::clone).toArray(int[][]::new);
 
-
-
                 tmpNode.x = p.x;
                 tmpNode.y = p.y;
                 tmpNode.newX = x;
                 tmpNode.newY = y;
+                
+//                for (int k = 0; k < HEIGHT; k++) {
+//                    for (int j = 0; j < WIDTH; j++) {
+//                    	if(tmpNode.board[k][j] == INVALID)
+//                    	{
+//                    		System.out.print("  ");
+//                    		continue;
+//                    	}
+//                        System.out.print(tmpNode.board[k][j] + " ");
+//                    }
+//                    System.out.println();
+//                }
+               // System.out.println(tmpNode.x + " " + tmpNode.y + " " + tmpNode.newX + " " + tmpNode.newY);
+                
 
                 resultList.add(tmpNode);
             }
         }
-//
+
 //        for (Node node : resultList) {
 //            System.out.println(node.x + " " + node.y + " " + node.newX + " " + node.newY);
 //        }
@@ -782,14 +830,48 @@ public class Game {
     }
 
     // ---------- Alpha-Beta -------------
-
+    int dummyNum =1;
     public Node alphaBetaPruning(int depth, int maxDepth, Node currentNode, Boolean maximizingPlayer, int alpha, int beta) {
 
         // generate new boards for the next level of the tree
         ArrayList<Node> subStates = new ArrayList<>();
         subStates = generateNextState(currentNode.board);
+        
+        if(dummyNum == 2)
+        {
+        	System.out.println("main board in second iteration");
+        	for (int k = 0; k < HEIGHT; k++) {
+                for (int j = 0; j < WIDTH; j++) {
+                	if(currentNode.board[k][j] == INVALID)
+                	{
+                		System.out.print("  ");
+                		continue;
+                	}
+                    System.out.print(currentNode.board[k][j] + " ");
+                }
+                System.out.println();
+            }
+        	
+        	int kk=1;
+//        	for (Node node : subStates) {
+//        		System.out.println( kk+ "sub State board");
+//        		kk++;
+//        		
+//        		for (int k = 0; k < HEIGHT; k++) {
+//                    for (int j = 0; j < WIDTH; j++) {
+//                    	if(node.board[k][j] == INVALID)
+//                    	{
+//                    		System.out.print("  ");
+//                    		continue;
+//                    	}
+//                        System.out.print(node.board[k][j] + " ");
+//                    }
+//                    System.out.println();
+//                }
+//			}
+        }
 
-        // when reach recuired depth calc the heuristic value of this board
+        // when reach required depth calc the heuristic value of this board
         if (depth == maxDepth)
         {
             int hueVal = getHeuristic(currentNode.board);
@@ -816,17 +898,32 @@ public class Game {
                     }
 
                     bestNode.heuristicVal = nextNode.heuristicVal;
-                    bestNode.newX = nextNode.newX;
-                    bestNode.newY = nextNode.newY;
-                    bestNode.x = nextNode.x;
-                    bestNode.y = nextNode.y;
+                   
+                	if(depth==0)
+                	{
+                		System.out.println("in Alpha depth0");
+                		bestNode.newX = nextNode.newX;
+                        bestNode.newY = nextNode.newY;
+                        bestNode.x = nextNode.x;
+                        bestNode.y = nextNode.y;
+                	}
+                	else
+                	{
+                		bestNode.newX = currentNode.newX;
+                        bestNode.newY = currentNode.newY;
+                        bestNode.x = currentNode.x;
+                        bestNode.y = currentNode.y;
+                	}
+                    
 
-//                    System.out.println("--Alpha--");
+//                     System.out.println("--Alpha--");
 //                    System.out.println(bestNode.x + " " + bestNode.y);
 //                    System.out.println(bestNode.newX + " " + bestNode.newY);
 //                    System.out.println("------");
 
                 }
+                
+                
                 //best = Math.max(best, nextNode.heuristicVal);
                 alpha = Math.max(alpha, bestNode.heuristicVal);
 
@@ -834,14 +931,14 @@ public class Game {
                 if (beta <= alpha)
                     break;
             }
+            
             return bestNode;
 
         } else {
             //int best = MAX;
             Node bestNode = new Node();
             bestNode.heuristicVal = MAX;
-            // Recur for left and
-            // right children
+            
 
 
             for (int i = 0; i < subStates.size(); i++) {
@@ -858,22 +955,38 @@ public class Game {
                     }
 
                     bestNode.heuristicVal = nextNode.heuristicVal;
-                    bestNode.newX = nextNode.newX;
-                    bestNode.newY = nextNode.newY;
-                    bestNode.x = nextNode.x;
-                    bestNode.y = nextNode.y;
+                    
+                    if(depth==0)
+                	{
+                		System.out.println("in Beta depth0");
+                		bestNode.newX = nextNode.newX;
+                        bestNode.newY = nextNode.newY;
+                        bestNode.x = nextNode.x;
+                        bestNode.y = nextNode.y;
+                	}
+                	else
+                	{
+                		bestNode.newX = currentNode.newX;
+                        bestNode.newY = currentNode.newY;
+                        bestNode.x = currentNode.x;
+                        bestNode.y = currentNode.y;
+                	}
 
-//                    System.out.println("---Beta--");
+//                      System.out.println("---Beta--");
 //                    System.out.println(bestNode.x + " " + bestNode.y);
 //                    System.out.println(bestNode.newX + " " + bestNode.newY);
 //                    System.out.println("------");
                 }
-
+                
+                
+                
                 beta = Math.min(beta, bestNode.heuristicVal);
                 // Alpha Beta Pruning
                 if (beta <= alpha)
                     break;
             }
+            
+            
 
             return bestNode;
         }
