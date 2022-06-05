@@ -38,14 +38,6 @@ public class Game {
         this.Turn = 1;
     }
 
-    public Game copy() {
-        Game g = new Game();
-        g.board = this.board;
-        g.tmpboard = this.tmpboard;
-        g.Turn = this.Turn;
-        return g;
-    }
-
     public void buildBoard() {
 
         // set empty cells to 0
@@ -276,10 +268,6 @@ public class Game {
     // verify move for player
     public boolean verifyAdjMoveForP(int currentX, int currentY, int goalX, int goalY) {
         int value = board[currentY][currentX];
-        if (!(value == BOT_PLAYER)) {
-            System.out.println("You can't access this marble");
-            return false;
-        }
         if (currentX == goalX && currentY == goalY) {
             System.out.println("can't play in same place");
             return false;
@@ -733,21 +721,21 @@ public class Game {
                     restmp = Math.abs(x - goalP.x) + Math.abs(y - goalP.y);
                     if (restmp < minVal)
                     {
-                        System.out.println("less " + goalP.x + " " + goalP.y + " " + p.x + " " + p.y + " " + x + " " + y);
-                        System.out.println("Board");
-                        for (int k = 0; k < HEIGHT; k++) {
-                            for (int j = 0; j < WIDTH; j++) {
-                                System.out.print(tBoard[k][j] + " ");
-                            }
-                            System.out.println();
-                        }
-                        System.out.println();
+//                        System.out.println("less " + goalP.x + " " + goalP.y + " " + p.x + " " + p.y + " " + x + " " + y);
+//                        System.out.println("Board");
+//                        for (int k = 0; k < HEIGHT; k++) {
+//                            for (int j = 0; j < WIDTH; j++) {
+//                                System.out.print(tBoard[k][j] + " ");
+//                            }
+//                            System.out.println();
+//                        }
+//                        System.out.println();
                         minVal = restmp;
                     }
                 }
             }
         }
-        System.out.println("minVal = " + minVal);
+//        System.out.println("minVal = " + minVal);
         return minVal;
     }
 
@@ -785,10 +773,10 @@ public class Game {
                 resultList.add(tmpNode);
             }
         }
-
-        for (Node node : resultList) {
-            System.out.println(node.x + " " + node.y + " " + node.newX + " " + node.newY);
-        }
+//
+//        for (Node node : resultList) {
+//            System.out.println(node.x + " " + node.y + " " + node.newX + " " + node.newY);
+//        }
 
         return resultList;
     }
@@ -833,10 +821,10 @@ public class Game {
                     bestNode.x = nextNode.x;
                     bestNode.y = nextNode.y;
 
-                    System.out.println("--Alpha--");
-                    System.out.println(bestNode.x + " " + bestNode.y);
-                    System.out.println(bestNode.newX + " " + bestNode.newY);
-                    System.out.println("------");
+//                    System.out.println("--Alpha--");
+//                    System.out.println(bestNode.x + " " + bestNode.y);
+//                    System.out.println(bestNode.newX + " " + bestNode.newY);
+//                    System.out.println("------");
 
                 }
                 //best = Math.max(best, nextNode.heuristicVal);
@@ -875,10 +863,10 @@ public class Game {
                     bestNode.x = nextNode.x;
                     bestNode.y = nextNode.y;
 
-                    System.out.println("---Beta--");
-                    System.out.println(bestNode.x + " " + bestNode.y);
-                    System.out.println(bestNode.newX + " " + bestNode.newY);
-                    System.out.println("------");
+//                    System.out.println("---Beta--");
+//                    System.out.println(bestNode.x + " " + bestNode.y);
+//                    System.out.println(bestNode.newX + " " + bestNode.newY);
+//                    System.out.println("------");
                 }
 
                 beta = Math.min(beta, bestNode.heuristicVal);
