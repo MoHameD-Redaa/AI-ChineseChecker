@@ -1,3 +1,5 @@
+package com.company;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,8 +11,8 @@ public class Game {
     public static final int BOT_PLAYER = 2;
     public static final int HEIGHT = 17;
     public static final int WIDTH = 25;
-    public static int MAX = 1000;
-    public static int MIN = -1000;
+    public static int MAX = 10000;
+    public static int MIN = -10000;
 
     public int[][] board, tmpboard;
     public ArrayList<Cell> playerList = new ArrayList<>();
@@ -27,7 +29,7 @@ public class Game {
     }
 
     public Game(int[][] board) {
-        this.board = board;
+        this.board = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
         loadTmpBoard();
         this.Turn = 1; // that mean the player will play first
     }
@@ -276,7 +278,10 @@ public class Game {
     // verify move for player
     public boolean verifyAdjMoveForP(int currentX, int currentY, int goalX, int goalY) {
         int value = board[currentY][currentX];
-        
+        if (!(value == BOT_PLAYER)) {
+            System.out.println("You can't access this marble");
+            return false;
+        }
         if (currentX == goalX && currentY == goalY) {
             System.out.println("can't play in same place");
             return false;
@@ -680,15 +685,7 @@ public class Game {
 
     //check if game is over
     public boolean gameOver() {
-        if (playerWon()) {
-            System.out.println("*************************");
-            System.out.println("***Player Win The game***");
-            System.out.println("**************************");
-            return true;
-        } else if (botWon()) {
-            System.out.println("************************");
-            System.out.println("****PC Win The game****");
-            System.out.println("*************************");
+        if (playerWon() || botWon()) {
             return true;
         } else
             return false;
@@ -713,74 +710,26 @@ public class Game {
         int minVal = 100000;
 
         for (Cell p : game.getAvailableCells(0)) {
-
-            //System.out.println("p.x: " + p.y + " p.y: " + p.x);
-            //System.out.println(p.AvailableCells);
-
             int x, y, restmp;
-            
-//            for(Cell goalP : playerStartList) {
-//            	restmp = Math.abs(p.x - goalP.y) + Math.abs(p.y - goalP.x);
-//            	if (restmp < minVal)
-//                {
-//            		minVal = restmp;
-//                }
-//            }
-            	
-            	
-            for (int i = 0; i < p.AvailableCells.size() - 1; i += 2) {
 
-                x = p.AvailableCells.get(i);
-                y = p.AvailableCells.get(i + 1);
-
-
-
-                for (Cell goalP : playerStartList) {
-                    restmp = Math.abs(x - goalP.y) + Math.abs(y - goalP.x);
-                    if (restmp < minVal)
-                    {
-                        //System.out.println("less " + goalP.x + " " + goalP.y + " " + p.x + " " + p.y + " " + x + " " + y);
-                        //System.out.println("Board");
-//                        for (int k = 0; k < HEIGHT; k++) {
-//                            for (int j = 0; j < WIDTH; j++) {
-//                            	if(tBoard[k][j] == -1)
-//                            	{
-//                            		System.out.print("  ");
-//                            		continue;
-//                            	}
-//                                System.out.print(tBoard[k][j] + " ");
-//                            }
-//                            System.out.println();
-//                        }
-                        //System.out.println();
-                        minVal = restmp;
-                    }
+            for(Cell goalP : playerStartList) {
+                restmp = Math.abs(p.x - goalP.y) + Math.abs(p.y - goalP.x);
+                if (restmp < minVal)
+                {
+                    minVal = restmp;
                 }
             }
         }
-        //System.out.println("minVal = " + minVal);
         return minVal;
     }
 
-    // generate all possible boards of current boaard by moving each marble to one of each possible move in AvailableCells
-    public ArrayList<Node> generateNextState(int[][] board) {
+    // generate all possible boards of current board by moving each marble to one of each possible move in AvailableCells
+    public ArrayList<Node> generateNextState(int[][] board, int turn) {
         ArrayList<Node> resultList = new ArrayList<>();
         Game tmpGame = new Game(board);
-        
-//        System.out.println("parameter board");
-//        for (int k = 0; k < HEIGHT; k++) {
-//            for (int j = 0; j < WIDTH; j++) {
-//            	if(board[k][j] == INVALID)
-//            	{
-//            		System.out.print("  ");
-//            		continue;
-//            	}
-//                System.out.print(board[k][j] + " ");
-//            }
-//            System.out.println();
-//        }
-        
-        for (Cell p : tmpGame.getAvailableCells(0)) {
+        ArrayList<Cell> available = tmpGame.getAvailableCells(turn);
+
+        for (Cell p : available) {
             int x, y;
 
             for (int i = 0; i < p.AvailableCells.size(); i += 2) {
@@ -788,13 +737,10 @@ public class Game {
                 x = p.AvailableCells.get(i);	// because p.AvailableCells return [y, x, y, x, ....]
                 y = p.AvailableCells.get(i + 1);
 
-                if (!tmpGame.verifyAdjMoveForP(p.x, p.y, x, y)) //>>>>
-                    continue;
-
-                int[][] tmpBoard = Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
+                int[][] tmpBoard = Arrays.stream(tmpGame.board).map(int[]::clone).toArray(int[][]::new);
 
                 tmpBoard[p.y][p.x] = EMPTY;
-                tmpBoard[y][x] = BOT_PLAYER; // because p.AvailableCells return [y, x, y, x, ....]}
+                tmpBoard[y][x] = turn==0?BOT_PLAYER:HUMAN_PLAYER; // because p.AvailableCells return [y, x, y, x, ....]}
 
                 Node tmpNode = new Node();
                 tmpNode.board = Arrays.stream(tmpBoard).map(int[]::clone).toArray(int[][]::new);
@@ -803,75 +749,18 @@ public class Game {
                 tmpNode.y = p.y;
                 tmpNode.newX = x;
                 tmpNode.newY = y;
-                
-//                for (int k = 0; k < HEIGHT; k++) {
-//                    for (int j = 0; j < WIDTH; j++) {
-//                    	if(tmpNode.board[k][j] == INVALID)
-//                    	{
-//                    		System.out.print("  ");
-//                    		continue;
-//                    	}
-//                        System.out.print(tmpNode.board[k][j] + " ");
-//                    }
-//                    System.out.println();
-//                }
-               // System.out.println(tmpNode.x + " " + tmpNode.y + " " + tmpNode.newX + " " + tmpNode.newY);
-                
 
                 resultList.add(tmpNode);
             }
         }
-
-//        for (Node node : resultList) {
-//            System.out.println(node.x + " " + node.y + " " + node.newX + " " + node.newY);
-//        }
-
         return resultList;
     }
 
     // ---------- Alpha-Beta -------------
-    int dummyNum =1;
+
     public Node alphaBetaPruning(int depth, int maxDepth, Node currentNode, Boolean maximizingPlayer, int alpha, int beta) {
 
         // generate new boards for the next level of the tree
-        ArrayList<Node> subStates = new ArrayList<>();
-        subStates = generateNextState(currentNode.board);
-        
-        if(dummyNum == 2)
-        {
-        	System.out.println("main board in second iteration");
-        	for (int k = 0; k < HEIGHT; k++) {
-                for (int j = 0; j < WIDTH; j++) {
-                	if(currentNode.board[k][j] == INVALID)
-                	{
-                		System.out.print("  ");
-                		continue;
-                	}
-                    System.out.print(currentNode.board[k][j] + " ");
-                }
-                System.out.println();
-            }
-        	
-        	int kk=1;
-//        	for (Node node : subStates) {
-//        		System.out.println( kk+ "sub State board");
-//        		kk++;
-//        		
-//        		for (int k = 0; k < HEIGHT; k++) {
-//                    for (int j = 0; j < WIDTH; j++) {
-//                    	if(node.board[k][j] == INVALID)
-//                    	{
-//                    		System.out.print("  ");
-//                    		continue;
-//                    	}
-//                        System.out.print(node.board[k][j] + " ");
-//                    }
-//                    System.out.println();
-//                }
-//			}
-        }
-
-        // when reach required depth calc the heuristic value of this board
         if (depth == maxDepth)
         {
             int hueVal = getHeuristic(currentNode.board);
@@ -879,8 +768,18 @@ public class Game {
             return currentNode;
         }
 
-        if (maximizingPlayer) {
-            Node bestNode = new Node();
+        ArrayList<Node> subStates = new ArrayList<>();
+        if(depth%2==0) {
+            subStates = generateNextState(currentNode.board,0);
+        }
+        else {
+            subStates = generateNextState(currentNode.board,1);
+        }
+
+        // when reach required depth calc the heuristic value of this board
+
+        Node bestNode = new Node();
+        if (!(maximizingPlayer)) {
             bestNode.heuristicVal = MIN;
 
             // call alphaBeta for each subState
@@ -888,42 +787,16 @@ public class Game {
 
                 Node nextNode = alphaBetaPruning(depth + 1, maxDepth, subStates.get(i), false, alpha, beta);
 
-                // get max best node
                 if (bestNode.heuristicVal < nextNode.heuristicVal)
                 {
-                    // copy nextNode.board to bestNode.board
-                    bestNode.board = new int[Game.HEIGHT][];
-                    for (int j = 0; j < Game.HEIGHT; j++) {
-                        bestNode.board[j] = nextNode.board[j].clone();
-                    }
-
                     bestNode.heuristicVal = nextNode.heuristicVal;
-                   
-                	if(depth==0)
-                	{
-                		System.out.println("in Alpha depth0");
-                		bestNode.newX = nextNode.newX;
-                        bestNode.newY = nextNode.newY;
-                        bestNode.x = nextNode.x;
-                        bestNode.y = nextNode.y;
-                	}
-                	else
-                	{
-                		bestNode.newX = currentNode.newX;
-                        bestNode.newY = currentNode.newY;
-                        bestNode.x = currentNode.x;
-                        bestNode.y = currentNode.y;
-                	}
-                    
 
-//                     System.out.println("--Alpha--");
-//                    System.out.println(bestNode.x + " " + bestNode.y);
-//                    System.out.println(bestNode.newX + " " + bestNode.newY);
-//                    System.out.println("------");
-
+                    bestNode.board = Arrays.stream(subStates.get(i).board).map(int[]::clone).toArray(int[][]::new);
+                    bestNode.newX = subStates.get(i).newX;
+                    bestNode.newY = subStates.get(i).newY;
+                    bestNode.x = subStates.get(i).x;
+                    bestNode.y = subStates.get(i).y;
                 }
-                
-                
                 //best = Math.max(best, nextNode.heuristicVal);
                 alpha = Math.max(alpha, bestNode.heuristicVal);
 
@@ -931,15 +804,12 @@ public class Game {
                 if (beta <= alpha)
                     break;
             }
-            
-            return bestNode;
 
         } else {
             //int best = MAX;
-            Node bestNode = new Node();
             bestNode.heuristicVal = MAX;
-            
-
+            // Recur for left and
+            // right children
 
             for (int i = 0; i < subStates.size(); i++) {
 
@@ -948,47 +818,21 @@ public class Game {
                 // get max best node
                 if(bestNode.heuristicVal > nextNode.heuristicVal)
                 {
-                    // copy nextNode.board to bestNode.board
-                    bestNode.board = new int[Game.HEIGHT][];
-                    for (int j = 0; j < Game.HEIGHT; j++) {
-                        bestNode.board[j] = nextNode.board[j].clone();
-                    }
-
                     bestNode.heuristicVal = nextNode.heuristicVal;
-                    
-                    if(depth==0)
-                	{
-                		System.out.println("in Beta depth0");
-                		bestNode.newX = nextNode.newX;
-                        bestNode.newY = nextNode.newY;
-                        bestNode.x = nextNode.x;
-                        bestNode.y = nextNode.y;
-                	}
-                	else
-                	{
-                		bestNode.newX = currentNode.newX;
-                        bestNode.newY = currentNode.newY;
-                        bestNode.x = currentNode.x;
-                        bestNode.y = currentNode.y;
-                	}
 
-//                      System.out.println("---Beta--");
-//                    System.out.println(bestNode.x + " " + bestNode.y);
-//                    System.out.println(bestNode.newX + " " + bestNode.newY);
-//                    System.out.println("------");
+                    bestNode.board = Arrays.stream(subStates.get(i).board).map(int[]::clone).toArray(int[][]::new);
+
+                    bestNode.newX = subStates.get(i).newX;
+                    bestNode.newY = subStates.get(i).newY;
+                    bestNode.x = subStates.get(i).x;
+                    bestNode.y = subStates.get(i).y;
                 }
-                
-                
-                
                 beta = Math.min(beta, bestNode.heuristicVal);
                 // Alpha Beta Pruning
                 if (beta <= alpha)
                     break;
             }
-            
-            
-
-            return bestNode;
         }
+        return bestNode;
     }
 }

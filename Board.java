@@ -1,3 +1,5 @@
+package com.company;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -28,7 +30,8 @@ public class Board extends JButton {
         this(window, new Game(), new HumanPlayer(), new BotPlayer());
     }
 
-    public Board(GUI window, Game game, Player player1, Player player2) {
+    public Board(GUI window, Game game,
+                 Player player1, Player player2) {
 
         // Setup the component
         super.setBorderPainted(false);
@@ -78,9 +81,10 @@ public class Board extends JButton {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+//        Game game = this.game.copy();
 
         // Perform calculations
-        final int CELL_SIZE = 40, X_OFFSET = 350, Y_OFFSET = 150;
+        final int CELL_SIZE = 30, X_OFFSET = 300, Y_OFFSET = 50;
 
 //        // Draw checker board
         g.setColor(Color.WHITE);
@@ -115,7 +119,6 @@ public class Board extends JButton {
                     }
                 }
             } else if (game.board[selected.y][selected.x] == Game.EMPTY) {
-                System.out.println(selected.y + " " + selected.x);
                 for (Cell cell : availableCells) {
                     if (cell.x == selected.x && cell.y == selected.y) {
                         game.move(lastValid.x, lastValid.y, selected.x, selected.y);
@@ -220,7 +223,7 @@ public class Board extends JButton {
             return;
         }
 
-        final int CELL_SIZE = 40, X_OFFSET = 350, Y_OFFSET = 150;
+        final int CELL_SIZE = 30, X_OFFSET = 300, Y_OFFSET = 50;
 
         x = (x - X_OFFSET) / CELL_SIZE;
         y = (y - Y_OFFSET) / CELL_SIZE;

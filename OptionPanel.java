@@ -1,3 +1,5 @@
+package com.company;
+
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -6,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 public class OptionPanel extends JPanel {
-    private final GUI window;
+    public final GUI window;
     private final JButton restartBtn;
 
     public OptionPanel(GUI window) {
